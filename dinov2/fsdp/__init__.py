@@ -64,8 +64,12 @@ def is_sharded_fsdp(x):
 
 def free_if_fsdp(x):
     if is_sharded_fsdp(x):
-        handles = x._handles
-        true_list = [True for h in handles]
+        handles = getattr(x, "_handles", None)
+        if handles is None:
+            handles = getattr(x, "_fsdp_handles", None)
+        if not handles:
+            return
+        true_list = [True for _ in handles]
         _reshard(x, handles, true_list)
 
 
